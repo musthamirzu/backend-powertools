@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-
+const PORT = process.env.PORT || 5004;
 const app = express();
 
 app.use(cors());
@@ -30,5 +30,5 @@ app.use((err, req, res, next) => {
     msg: err.message || "Server error"
   });
 });
-app.listen(5004, ()=>console.log("🚀 Server running on 5004"));
+app.listen(PORT, ()=>console.log(`🚀 Server running on port ${PORT}`));
 
