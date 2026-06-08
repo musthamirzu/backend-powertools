@@ -2,6 +2,16 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin");
+const crypto = require("crypto");
+const sendEmail =
+  require("../utils/sendEmail");
+const { OAuth2Client } =
+  require("google-auth-library");
+
+const client =
+  new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID
+  );
 
 exports.register = async (req, res) => {
   try {
@@ -107,3 +117,221 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.forgotPassword =
+  async (req, res) => {
+    try {
+
+      const { email } =
+        req.body;
+
+      const user =
+        await User.findOne({
+          email,
+        });
+
+      if (!user) {
+        return res
+          .status(404)
+          .json({
+            msg:
+              "User not found",
+          });
+      }
+
+      const resetToken =
+        crypto
+          .randomBytes(32)
+          .toString("hex");
+
+      user.resetPasswordToken =
+        resetToken;
+
+      user.resetPasswordExpire =
+        Date.now() +
+        15 * 60 * 1000;
+
+      await user.save();
+
+      const resetUrl =
+        `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+      console.log(
+  "FRONTEND_URL =",
+  process.env.FRONTEND_URL
+);
+      await sendEmail(
+        user.email,
+        "Reset Password",
+        `
+        <h2>Password Reset</h2>
+
+        <p>
+          Click below link:
+        </p>
+
+        <a href="${resetUrl}">
+          Reset Password
+        </a>
+        `
+      );
+
+      res.json({
+        msg:
+          "Password reset email sent",
+      });
+
+    } catch (err) {
+
+      console.log(err);
+
+      res.status(500).json({
+        msg:
+          "Server Error",
+      });
+
+    }
+  };
+
+
+  exports.resetPassword =
+  async (req, res) => {
+    try {
+
+      const { token } =
+        req.params;
+
+      const { password } =
+        req.body;
+
+      const user =
+        await User.findOne({
+          resetPasswordToken:
+            token,
+
+          resetPasswordExpire:
+          {
+            $gt: Date.now(),
+          },
+        });
+
+      if (!user) {
+        return res
+          .status(400)
+          .json({
+            msg:
+              "Invalid or expired token",
+          });
+      }
+
+      user.password =
+        await bcrypt.hash(
+          password,
+          10
+        );
+
+      user.resetPasswordToken =
+        undefined;
+
+      user.resetPasswordExpire =
+        undefined;
+
+      await user.save();
+
+      res.json({
+        msg:
+          "Password updated successfully",
+      });
+
+    } catch (err) {
+
+      console.log(err);
+
+      res.status(500).json({
+        msg:
+          "Server Error",
+      });
+
+    }
+  };
+
+
+  exports.googleLogin =
+  async (req, res) => {
+    try {
+
+      const { credential } =
+        req.body;
+
+      const ticket =
+        await client.verifyIdToken({
+          idToken: credential,
+          audience:
+            process.env.GOOGLE_CLIENT_ID,
+        });
+
+      const payload =
+        ticket.getPayload();
+
+      const {
+        sub,
+        email,
+        name,
+      } = payload;
+
+      let user =
+        await User.findOne({
+          email,
+        });
+
+      if (!user) {
+
+        user =
+          await User.create({
+            name,
+            email,
+            googleId: sub,
+            profileCompleted:
+              false,
+          });
+
+      }
+
+      const token =
+        jwt.sign(
+          {
+            id: user._id,
+            role: "user",
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: "7d",
+          }
+        );
+
+      res.json({
+        token,
+
+        user: {
+          id: user._id,
+          email:
+            user.email,
+          name:
+            user.name,
+
+          role: "user",
+
+          profileCompleted:
+            user.profileCompleted,
+        },
+      });
+
+    } catch (err) {
+
+      console.log(err);
+
+      res.status(500).json({
+        msg:
+          "Google Login Failed",
+      });
+
+    }
+  };

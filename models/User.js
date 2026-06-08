@@ -7,12 +7,14 @@ const userSchema = new mongoose.Schema({
   role: { type: String, default: "user" },
 
   profileCompleted: { type: Boolean, default: false },
-
+  googleId: String,
   mobile: String,
   age: Number,
   address: String,
   state: String,
-  district: String
+  district: String,
+  resetPasswordToken: String,
+  resetPasswordExpire: Date,
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);
