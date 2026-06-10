@@ -275,6 +275,7 @@ exports.forgotPassword =
         sub,
         email,
         name,
+         picture,
       } = payload;
 
       let user =
@@ -289,6 +290,7 @@ exports.forgotPassword =
             name,
             email,
             googleId: sub,
+             profileImage: picture,
             profileCompleted:
               false,
           });
@@ -325,13 +327,13 @@ exports.forgotPassword =
       });
 
     } catch (err) {
+  console.log(
+    "GOOGLE LOGIN ERROR:",
+    err
+  );
 
-      console.log(err);
-
-      res.status(500).json({
-        msg:
-          "Google Login Failed",
-      });
-
-    }
+  res.status(500).json({
+    msg: err.message,
+  });
+}
   };
