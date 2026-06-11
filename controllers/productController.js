@@ -23,9 +23,7 @@ exports.createProduct = async (req, res) => {
       category: categoryDoc._id, // ✅ FIX
       image: req.file ? req.file.path : "",
       description: req.body.description,
-      isBestSeller:
-    req.body.isBestSeller === "true" ||
-    req.body.isBestSeller === true,
+      tag: req.body.tag,
     });
 
     res.json(product);
@@ -88,13 +86,9 @@ exports.updateProduct = async (req, res) => {
       stock: Number(req.body.stock),
       brand: req.body.brand,
       description: req.body.description,
-      isBestSeller:
-        req.body.isBestSeller ===
-          "true" ||
-        req.body.isBestSeller ===
-          true,
+      tag: req.body.tag,
     };
-    
+
 
     if (req.file) {
       updateData.image = req.file.path;
@@ -114,7 +108,7 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-exports.deleteProduct = async (req,res)=>{
+exports.deleteProduct = async (req, res) => {
   try {
 
     const product = await Product.findById(req.params.id);
@@ -146,10 +140,10 @@ exports.getBestSellers = async (
 
     const products =
       await Product.find({
-        isBestSeller: true,
+        tag: "BEST_SELLER"
       })
-      .populate("category")
-      .limit(5);
+        .populate("category")
+        .limit(5);
 
     res.json(products);
 
@@ -202,6 +196,28 @@ exports.toggleBestSeller =
       res.status(500).json({
         msg:
           "Server Error",
+      });
+
+    }
+  };
+
+  exports.getNewArrivals =
+  async (req, res) => {
+    try {
+
+      const products =
+        await Product.find({
+          tag: "NEW_ARRIVAL"
+        })
+        .populate("category")
+        .limit(8);
+
+      res.json(products);
+
+    } catch (err) {
+
+      res.status(500).json({
+        msg: "Server Error"
       });
 
     }

@@ -36,9 +36,15 @@ const productSchema = new mongoose.Schema({
     default: ""
   },
 
-  isBestSeller: {
-    type: Boolean,
-    default: false
+    tag: {
+    type: String,
+    enum: [
+      "BEST_SELLER",
+      "NEW_ARRIVAL",
+      "TRENDING",
+      "FEATURED"
+    ],
+    default: ""
   }
 
 }, { timestamps: true });
