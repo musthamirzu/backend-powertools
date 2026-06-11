@@ -7,9 +7,12 @@ const Product = require("../models/Product");
 exports.adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
+     
+console.log("Login Email:", email);
 
-    const admin = await Admin.findOne({ email });
-    if (!admin) return res.status(400).json({ msg: "Admin not found" });
+const admin = await Admin.findOne({ email });
+
+console.log("Admin Found:", admin);    if (!admin) return res.status(400).json({ msg: "Admin not found" });
     
     const match = await bcrypt.compare(password, admin.password);
 

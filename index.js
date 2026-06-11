@@ -18,10 +18,9 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/categories", require("./routes/categoryRoutes"));
 
 app.use("/uploads", express.static("uploads"));
-mongoose.connect(process.env.MONGO_URI)
-.then(()=>console.log("✅ MongoDB Connected"))
-.catch(err=>console.log(err));
-
+mongoose.connect(process.env.MONGO_URI).then(() => {
+  console.log("Connected DB:", mongoose.connection.db.databaseName);
+});
 app.use((err, req, res, next) => {
   console.log("🔥 GLOBAL ERROR:", err);
   console.log("🔥 STACK:", err.stack);
