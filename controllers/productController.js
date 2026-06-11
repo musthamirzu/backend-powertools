@@ -222,3 +222,46 @@ exports.toggleBestSeller =
 
     }
   };
+
+  exports.getBrands = async (req, res) => {
+  try {
+
+    const brands =
+      await Product.distinct("brand");
+
+    res.json(brands);
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      msg: "Error fetching brands",
+    });
+
+  }
+};
+
+
+exports.getProductsByBrand =
+  async (req, res) => {
+    try {
+
+      const products =
+        await Product.find({
+          brand: req.params.brand,
+        });
+
+      res.json(products);
+
+    } catch (err) {
+
+      console.log(err);
+
+      res.status(500).json({
+        msg:
+          "Error fetching brand products",
+      });
+
+    }
+  };
