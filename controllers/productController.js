@@ -23,6 +23,9 @@ exports.createProduct = async (req, res) => {
       category: categoryDoc._id, // ✅ FIX
       image: req.file ? req.file.path : "",
       description: req.body.description,
+      isBestSeller:
+    req.body.isBestSeller === "true" ||
+    req.body.isBestSeller === true,
     });
 
     res.json(product);
@@ -84,8 +87,14 @@ exports.updateProduct = async (req, res) => {
       price: Number(req.body.price),
       stock: Number(req.body.stock),
       brand: req.body.brand,
-      description: req.body.description
+      description: req.body.description,
+      isBestSeller:
+        req.body.isBestSeller ===
+          "true" ||
+        req.body.isBestSeller ===
+          true,
     };
+    
 
     if (req.file) {
       updateData.image = req.file.path;
@@ -129,3 +138,71 @@ exports.deleteProduct = async (req,res)=>{
   }
 };
 
+exports.getBestSellers = async (
+  req,
+  res
+) => {
+  try {
+
+    const products =
+      await Product.find({
+        isBestSeller: true,
+      })
+      .populate("category")
+      .limit(5);
+
+    res.json(products);
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      msg:
+        "Error fetching best sellers",
+    });
+
+  }
+};
+
+
+exports.toggleBestSeller =
+  async (req, res) => {
+    try {
+
+      const product =
+        await Product.findById(
+          req.params.id
+        );
+
+      if (!product) {
+        return res
+          .status(404)
+          .json({
+            msg:
+              "Product not found",
+          });
+      }
+
+      product.isBestSeller =
+        !product.isBestSeller;
+
+      await product.save();
+
+      res.json({
+        msg:
+          "Best seller updated",
+        product,
+      });
+
+    } catch (err) {
+
+      console.log(err);
+
+      res.status(500).json({
+        msg:
+          "Server Error",
+      });
+
+    }
+  };

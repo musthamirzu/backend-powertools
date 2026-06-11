@@ -20,13 +20,11 @@ const productSchema = new mongoose.Schema({
     required: true
   },
 
-  
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
     required: true
   },
-
 
   brand: {
     type: String,
@@ -34,9 +32,15 @@ const productSchema = new mongoose.Schema({
   },
 
   description: {
-  type: String,
-  default: ""
-}
+    type: String,
+    default: ""
+  },
+
+  isBestSeller: {
+    type: Boolean,
+    default: false
+  }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("Product", productSchema);

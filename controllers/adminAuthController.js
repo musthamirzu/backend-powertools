@@ -10,8 +10,10 @@ exports.adminLogin = async (req, res) => {
 
     const admin = await Admin.findOne({ email });
     if (!admin) return res.status(400).json({ msg: "Admin not found" });
-
+    
     const match = await bcrypt.compare(password, admin.password);
+
+    console.log("Password Match:", match);
     if (!match) return res.status(400).json({ msg: "Wrong password" });
 
     const token = jwt.sign(
