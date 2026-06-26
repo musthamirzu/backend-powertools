@@ -39,6 +39,81 @@ exports.createCategory = async (req, res) => {
   }
 };
 
+exports.getMenu = async (req, res) => {
+  try {
+
+    const mainCategories = await Category.find({
+      parent: null,
+    }).lean();
+
+    const subCategories = await Category.find({
+      parent: { $ne: null },
+    }).lean();
+
+    const menu = mainCategories.map(main => ({
+      ...main,
+      children: subCategories.filter(
+        sub =>
+          sub.parent.toString() ===
+          main._id.toString()
+      ),
+    }));
+
+    res.json(menu);
+
+  } catch (err) {
+    res.status(500).json({
+      msg: "Error fetching menu",
+    });
+  }
+};
+
+exports.updateCategory = async (req, res) => {
+  try {
+    const { name, slug } = req.body;
+
+    const category = await Category.findById(req.params.id);
+
+    if (!category) {
+      return res.status(404).json({
+        msg: "Category not found",
+      });
+    }
+
+    // Prevent duplicate slug
+    const exists = await Category.findOne({
+      slug,
+      _id: { $ne: req.params.id },
+    });
+
+    if (exists) {
+      return res.status(400).json({
+        msg: "Category slug already exists",
+      });
+    }
+
+    category.name = name;
+    category.slug = slug;
+
+    if (req.file) {
+      category.image = req.file.path;
+    }
+
+    await category.save();
+
+    res.json({
+      msg: "Category updated successfully",
+      category,
+    });
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      msg: "Error updating category",
+    });
+  }
+};
 
 
 // 📦 GET ALL MAIN CATEGORIES
