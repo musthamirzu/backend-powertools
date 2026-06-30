@@ -128,3 +128,71 @@ res.status(200).json({
     });
   }
 };
+
+exports.getOrderById = async (req, res) => {
+  try {
+
+    const order = await Order.findById(req.params.id)
+      .populate(
+        "userId",
+        "name email mobile district state address"
+      );
+
+    if (!order) {
+      return res.status(404).json({
+        msg: "Order not found",
+      });
+    }
+
+    res.json(order);
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      msg: "Server Error",
+    });
+
+  }
+};
+
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    // Allow only valid statuses
+    if (
+      !["placed", "shipped", "delivered"].includes(status)
+    ) {
+      return res.status(400).json({
+        msg: "Invalid order status",
+      });
+    }
+
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({
+        msg: "Order not found",
+      });
+    }
+
+    order.status = status;
+
+    await order.save();
+
+    res.status(200).json({
+      msg: "Order status updated successfully",
+      order,
+    });
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      msg: "Server Error",
+    });
+  }
+};
+

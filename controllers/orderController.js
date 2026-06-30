@@ -4,6 +4,32 @@ const User = require("../models/User");
 const sendSMS = require("../utils/sendSMS");
 const Product = require("../models/Product");
 
+exports.getOrderTracker = async (req, res) => {
+  try {
+    const order = await Order.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        msg: "Order not found",
+      });
+    }
+
+    res.json({
+      status: order.status,
+    });
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      msg: "Server Error",
+    });
+  }
+};
+
 exports.placeOrder = async (req, res) => {
   try {
 
@@ -74,6 +100,23 @@ exports.placeOrder = async (req, res) => {
 exports.getMyOrders = async (req,res)=>{
   const orders = await Order.find({ userId: req.user.id });
   res.json(orders);
+};
+
+exports.getUserOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({
+      userId: req.user.id,
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json(orders);
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      msg: "Failed to fetch orders",
+    });
+  }
 };
 
 exports.cancelOrder = async (req,res)=>{

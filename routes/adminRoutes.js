@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const auth = require("../middleware/authMiddleware");
 const admin = require("../middleware/adminMiddleware");
-const {adminLogin,getAdminProfile, getDashboardStats} = require("../controllers/adminAuthController");
+const {adminLogin,getAdminProfile, getDashboardStats,updateOrderStatus,getOrderById} = require("../controllers/adminAuthController");
 const Order = require("../models/Order");
 const User = require("../models/User");
 
@@ -33,8 +33,18 @@ router.get("/stats", auth, admin, getDashboardStats);
 
 
 router.post("/login", adminLogin);
-
-
+router.put(
+  "/orders/:id/status",
+  auth,
+  admin,
+  updateOrderStatus
+);
+router.get(
+  "/orders/:id",
+  auth,
+  admin,
+  getOrderById
+);
 
 
 module.exports = router;
