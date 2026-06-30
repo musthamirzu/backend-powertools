@@ -265,3 +265,25 @@ exports.getProductsByBrand =
 
     }
   };
+
+  exports.getProductById = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id)
+      .populate("category");
+
+    if (!product) {
+      return res.status(404).json({
+        msg: "Product not found",
+      });
+    }
+
+    res.json(product);
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      msg: "Error fetching product",
+    });
+  }
+};

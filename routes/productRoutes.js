@@ -3,7 +3,7 @@ const auth = require("../middleware/authMiddleware");
 const admin = require("../middleware/adminMiddleware");
 const upload = require("../middleware/upload");
 
-const {getProductsByBrand,getBrands,getNewArrivals, toggleBestSeller,getBestSellers,createProduct, getProducts, createBulkProductsWithImages, updateProduct, deleteProduct } = require("../controllers/productController");
+const {getProductsByBrand,getBrands,getNewArrivals,getProductById, toggleBestSeller,getBestSellers,createProduct, getProducts, createBulkProductsWithImages, updateProduct, deleteProduct } = require("../controllers/productController");
 
 router.get("/", getProducts);
 router.post("/create", auth, admin, upload.single("image"), createProduct);
@@ -39,5 +39,6 @@ router.get(
   "/brand/:brand",
   getProductsByBrand
 );
+router.get("/:id", getProductById);
 module.exports = router;
 
